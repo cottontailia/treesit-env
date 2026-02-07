@@ -79,7 +79,7 @@
    (c :deps cpp)
    (cpp :mode c++-mode :use c++-ts-mode :deps c)
    (go :mode "\\.go\\'")
-   (gomod :use go-mod-ts-mode :vc camdencheek/tree-sitter-go-mod :mode "/go\\.mod\\'" :deps go)
+   (gomod :use go-mod-ts-mode :vc "camdencheek/tree-sitter-go-mod" :mode "/go\\.mod\\'" :deps go)
 
    ;; --- 4. Custom Layouts & Paths ---
    (typescript :deps tsx :vc "tree-sitter/tree-sitter-typescript" 
