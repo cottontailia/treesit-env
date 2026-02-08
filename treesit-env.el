@@ -249,9 +249,9 @@ Returns nil if the file does not exist or version is not found."
       (if (stringp trigger)
           (setq auto-mode-alist
                 (cons (cons trigger (if available target fallback))
-                      (cl-delete trigger auto-mode-alist :key #'car :test #'equal)))
+                      (cl-remove trigger auto-mode-alist :key #'car :test #'equal)))
         (setq major-mode-remap-alist
-              (cl-delete trigger major-mode-remap-alist :key #'car :test #'eq))
+              (cl-remove trigger major-mode-remap-alist :key #'car :test #'eq))
         (when available
           (push (cons trigger target) major-mode-remap-alist))))
 
@@ -310,7 +310,7 @@ Returns nil if the file does not exist or version is not found."
             (treesit-env--message lang-str "Installing grammar...")
             (let ((treesit-language-source-alist
                    (cons (list lang repo-root nil rel-src)
-                         (cl-delete lang treesit-language-source-alist :key #'car))))
+                         (cl-remove lang treesit-language-source-alist :key #'car :test #'eq))))
               (treesit-env--with-compiler-hack (treesit-install-language-grammar lang)))
 
             (treesit-env--sync-to-emacs recipe)
@@ -329,7 +329,7 @@ Returns nil if the file does not exist or version is not found."
                                                (treesit-env--warning lang-str "Installed! PLEASE RESTART EMACS to fix query mismatch.")
                                              (treesit-env--message lang-str "Installed!")))))))))
         (when (file-exists-p temp-dir) (delete-directory temp-dir t))
-        (setq treesit-env--installing-stack (cl-delete lang treesit-env--installing-stack))))))
+        (setq treesit-env--installing-stack (cl-remove lang treesit-env--installing-stack :test #'eq))))))
 
 (cl-defun treesit-env--apply-internal
     (lang &key use vc revision src-path deps mode interpreter activate)
@@ -371,7 +371,7 @@ Returns the generated recipe plist."
 
     (setq treesit-language-source-alist
           (cons (list lang final-url final-rev final-src)
-                (cl-delete lang treesit-language-source-alist :key #'car :test #'eq)))
+                (cl-remove lang treesit-language-source-alist :key #'car :test #'eq)))
 
     (setq treesit-env--active-recipes
           (cons recipe (cl-delete lang treesit-env--active-recipes
