@@ -74,7 +74,7 @@ The search stops if no compatibility is found within this limit."
 (defcustom treesit-env-abi-max nil
   "If non-nil, override the maximum ABI version allowed by treesit-env.
 When nil, the value returned by `treesit-library-abi-version' is used.
-Setting this to a lower version (e.g., 14) forces both auto-resolution 
+Setting this to a lower version (e.g., 14) forces both auto-resolution
 and manual installations to respect this limit."
   :type '(choice (const :tag "Use Emacs default" nil)
                  (integer :tag "Max ABI Version"))
@@ -134,9 +134,9 @@ Returns nil if the file does not exist or version is not found."
     (while (and (> current-abi abi-max) (< attempt treesit-env-auto-retry-fetch-limit))
       (cl-incf attempt)
       (let ((default-directory repo-root))
-        (treesit-env--message lang-str "Deepening history... (attempt %d/%d)" 
+        (treesit-env--message lang-str "Deepening history... (attempt %d/%d)"
                               attempt treesit-env-auto-retry-fetch-limit)
-        (call-process "git" nil nil nil "fetch" "--quiet" "--deepen" 
+        (call-process "git" nil nil nil "fetch" "--quiet" "--deepen"
                       (number-to-string treesit-env-auto-retry-fetch-step)))
       (with-temp-buffer
         (let ((default-directory repo-root))
@@ -149,15 +149,15 @@ Returns nil if the file does not exist or version is not found."
           (setq last-count total-count)
           (if (null new-commits)
               (progn
-               (treesit-env--message lang-str 
-                                     "No new commits found (may have reached repository root)")
-               (setq attempt treesit-env-auto-retry-fetch-limit))
+                (treesit-env--message lang-str
+                                      "No new commits found (may have reached repository root)")
+                (setq attempt treesit-env-auto-retry-fetch-limit))
             (treesit-env--message lang-str "Checking %d new commits..." (length new-commits))
             (dolist (commit new-commits)
               (unless (<= current-abi abi-max)
                 (cl-incf checked)
                 (when (zerop (mod checked 5))
-                  (treesit-env--message lang-str "Progress: %d/%d new commits" 
+                  (treesit-env--message lang-str "Progress: %d/%d new commits"
                                         checked (length new-commits)))
                 (with-temp-buffer
                   (let ((default-directory repo-root))
@@ -165,8 +165,8 @@ Returns nil if the file does not exist or version is not found."
                   (setq current-abi (or (treesit-env--get-file-abi-from-buffer) most-positive-fixnum)))
                 (when (<= current-abi abi-max)
                   (let ((default-directory repo-root))
-                    (treesit-env--message lang-str 
-                                          "✓ Found compatible revision %s (ABI %d)" 
+                    (treesit-env--message lang-str
+                                          "✓ Found compatible revision %s (ABI %d)"
                                           commit current-abi)
                     (call-process "git" nil nil nil "checkout" "--quiet" commit)))))))))))
 
@@ -218,8 +218,8 @@ Returns nil if the file does not exist or version is not found."
         (inte-list (plist-get recipe :interpreter)))
     (or (and target    (or (eq major-mode target)   (derived-mode-p target)))
         (and fallback (or (eq major-mode fallback) (derived-mode-p fallback)))
-        (and inte-list 
-             (let ((current-interp (cl-find-if (lambda (entry) (eq (cdr entry) major-mode)) 
+        (and inte-list
+             (let ((current-interp (cl-find-if (lambda (entry) (eq (cdr entry) major-mode))
                                                interpreter-mode-alist)))
                (and current-interp (member (car current-interp) inte-list))))
         (let ((modes (cl-remove-if-not #'symbolp triggers))
@@ -302,9 +302,9 @@ Returns nil if the file does not exist or version is not found."
             (let ((abi-max (or treesit-env-abi-max (treesit-library-abi-version)))
                   (abi-got (treesit-env--get-file-abi parser-file)))
               (when (and abi-got (> abi-got abi-max))
-                (treesit-env--abort 
-                 lang-str 
-                 "ABI %d too new (max %d). Try setting :revision \"...\" etc." 
+                (treesit-env--abort
+                 lang-str
+                 "ABI %d too new (max %d). Try setting :revision \"...\" etc."
                  abi-got abi-max)))
 
             (treesit-env--message lang-str "Installing grammar...")
@@ -339,19 +339,19 @@ Returns the generated recipe plist."
          (default-recipe (cdr (assoc lang treesit-env-recipes)))
          (existing-recipe (cl-find lang treesit-env--active-recipes
                                    :key (lambda (r) (plist-get r :lang)) :test #'eq))
-         (final-vc   (or vc 
+         (final-vc   (or vc
                          (plist-get existing-recipe :vc)
                          (plist-get default-recipe :vc)))
-         (final-rev  (or revision 
+         (final-rev  (or revision
                          (plist-get existing-recipe :revision)
                          (plist-get default-recipe :revision)))
-         (final-src  (or src-path 
+         (final-src  (or src-path
                          (plist-get existing-recipe :src-path)
                          (plist-get default-recipe :src-path)))
-         (final-use  (or use 
+         (final-use  (or use
                          (plist-get existing-recipe :use)
                          (plist-get default-recipe :use)))
-         (final-deps (or deps 
+         (final-deps (or deps
                          (plist-get existing-recipe :deps)
                          (plist-get default-recipe :deps)))
          (final-mode (let ((saved (plist-get default-recipe :mode))
@@ -491,7 +491,7 @@ Full set of keywords:
     :deps c cpp              ; Override: dependencies (no parens needed)
     :mode \"\\\\.ext\\\\='\" mode     ; Append: additional patterns/modes
     :interpreter \"sh\" \"py\")  ; Append: additional shebang sigils"
-    (declare (indent 0))
+  (declare (indent 0))
   (let (langs body)
     (while (and args (not (keywordp (car args))))
       (let ((arg (pop args)))
@@ -536,14 +536,14 @@ Full set of keywords:
   "Install all activated grammars that are not yet available on the system."
   (interactive)
   (let ((langs (cl-remove-if #'treesit-language-available-p
-                             (mapcar (lambda (r) (plist-get r :lang)) 
+                             (mapcar (lambda (r) (plist-get r :lang))
                                      treesit-env--active-recipes))))
     (cond
      ((null langs)
       (message "[treesit-env] No missing grammars to install."))
      ((y-or-n-p (format "Install %d missing grammars? This may take some time... " (length langs)))
       (dolist (lang langs)
-        (let ((recipe (cl-find lang treesit-env--active-recipes 
+        (let ((recipe (cl-find lang treesit-env--active-recipes
                                :key (lambda (r) (plist-get r :lang)) :test #'eq)))
           (when recipe
             (treesit-env--execute-install recipe))))

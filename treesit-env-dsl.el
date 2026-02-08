@@ -77,7 +77,7 @@
             (if (eq current-type 'single)
                 (setq result (plist-put result current-key item)
                       current-key nil)
-              (setq result (plist-put result current-key 
+              (setq result (plist-put result current-key
                                       (cons item (plist-get result current-key))))))))))
     (when current-key
       (cond
