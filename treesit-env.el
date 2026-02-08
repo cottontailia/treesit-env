@@ -337,19 +337,33 @@ Returns nil if the file does not exist or version is not found."
 Returns the generated recipe plist."
   (let* ((lang-str (symbol-name lang))
          (default-recipe (cdr (assoc lang treesit-env-recipes)))
-         (final-vc   (or vc (plist-get default-recipe :vc)))
-         (final-rev  (or revision (plist-get default-recipe :revision)))
-         (final-src  (or src-path (plist-get default-recipe :src-path)))
-         (final-use  (or use (plist-get default-recipe :use)))
-         (final-deps (or deps (plist-get default-recipe :deps)))
-         (final-mode (let ((saved (plist-get default-recipe :mode)))
+         (existing-recipe (cl-find lang treesit-env--active-recipes
+                                   :key (lambda (r) (plist-get r :lang)) :test #'eq))
+         (final-vc   (or vc 
+                         (plist-get existing-recipe :vc)
+                         (plist-get default-recipe :vc)))
+         (final-rev  (or revision 
+                         (plist-get existing-recipe :revision)
+                         (plist-get default-recipe :revision)))
+         (final-src  (or src-path 
+                         (plist-get existing-recipe :src-path)
+                         (plist-get default-recipe :src-path)))
+         (final-use  (or use 
+                         (plist-get existing-recipe :use)
+                         (plist-get default-recipe :use)))
+         (final-deps (or deps 
+                         (plist-get existing-recipe :deps)
+                         (plist-get default-recipe :deps)))
+         (final-mode (let ((saved (plist-get default-recipe :mode))
+                           (existing (plist-get existing-recipe :mode)))
                        (if (and mode saved)
                            (cl-remove-duplicates (append mode saved) :test #'equal)
-                         (or mode saved))))
-         (final-inte (let ((saved (plist-get default-recipe :interpreter)))
+                         (or mode existing saved))))
+         (final-inte (let ((saved (plist-get default-recipe :interpreter))
+                           (existing (plist-get existing-recipe :interpreter)))
                        (if (and interpreter saved)
                            (cl-remove-duplicates (append interpreter saved) :test #'equal)
-                         (or interpreter saved))))
+                         (or interpreter existing saved))))
          (target-ts-mode (or final-use (intern (concat lang-str "-ts-mode"))))
          (fallback-mode (or (car (last (cl-remove-if-not #'symbolp final-mode)))
                             (intern (concat lang-str "-mode"))))
