@@ -5,7 +5,7 @@
 ;; Author: Cottontailia
 ;; Additional-Author: AI Assistant
 ;; URL: https://github.com/cottontailia/treesit-env
-;; Version: 0.5.0
+;; Version: 0.5.1
 ;; Package-Requires: ((emacs "29.1") (cl-lib "1.0"))
 ;; Keywords: tree-sitter, tools, maint
 ;; License: CC0
@@ -28,7 +28,7 @@
 (require 'treesit)
 (require 'treesit-env-dsl)
 
-(defconst treesit-env-version "0.5.0"
+(defconst treesit-env-version "0.5.1"
   "Current version of the treesit-env package.")
 
 (defvar treesit--library-not-found-warning-emitted)
