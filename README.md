@@ -49,10 +49,6 @@ Using the `:vc` keyword in `use-package` is recommended:
 (use-package treesit-env
   :vc (:url "https://github.com/cottontailia/treesit-env")
   :custom
-  ;; Using Zig as a compiler (highly recommended for Windows)
-  (treesit-env-compiler-cc '("zig" "cc"))
-  (treesit-env-compiler-c++ '("zig" "c++"))
-
   ;; Determines the default behavior when :revision is omitted:
   ;; nil (Default): Fetches the latest master/main
   ;; t: Behaves as `auto` (Automatic ABI discovery)
@@ -63,6 +59,11 @@ Using the `:vc` keyword in `use-package` is recommended:
   (treesit-env-abi-max 14)
 
   :config
+  ;; Using Zig as a compiler (highly recommended for Windows)
+  (when (eq system-type 'windows-nt)
+      (setq treesit-env-compiler-cc '("zig" "cc"))
+      (setq treesit-env-compiler-c++ '("zig" "c++")))
+
   ;; Use the provided minimal sample recipes (Optional)
   (require 'treesit-env-recipe-placeholder)
   (treesit-env-source treesit-env-recipe-placeholder))
