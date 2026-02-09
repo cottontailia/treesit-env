@@ -6,7 +6,7 @@
 ;; Additional-Author: AI Assistant
 ;; URL: https://github.com/cottontailia/treesit-env
 ;; Keywords: lisp, dsl, parsing
-;; Package-Requires: ((emacs "30.2") (cl-lib "1.0"))
+;; Package-Requires: ((emacs "29.1") (cl-lib "1.0"))
 ;; License: CC0
 
 ;;; Commentary:

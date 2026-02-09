@@ -5,7 +5,7 @@
 ;; Author: Cottontailia
 ;; Additional-Author: AI Assistant
 ;; URL: https://github.com/cottontailia/treesit-env
-;; Package-Requires: ((emacs "30.2") (cl-lib "1.0"))
+;; Package-Requires: ((emacs "29.1") (cl-lib "1.0"))
 ;; Keywords: tree-sitter, tools, maint
 ;; License: CC0
 

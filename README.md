@@ -1,11 +1,9 @@
 # treesit-env.el
 
 [![License: CC0](https://img.shields.io/badge/License-CC0-blue.svg)](http://creativecommons.org/publicdomain/zero/1.0/)
-[![Emacs](https://img.shields.io/badge/Emacs-30.2+-purple.svg)](https://www.gnu.org/software/emacs/)
+[![Emacs](https://img.shields.io/badge/Emacs-29.1+-purple.svg)](https://www.gnu.org/software/emacs/)
 
 `treesit-env` is a package for declarative and centralized management of the built-in Tree-sitter (`treesit.el`) environment.
-
-*Note: While `treesit.el` was introduced in Emacs 29.1, this package requires **Emacs 30.2** or later due to internal implementation requirements.*
 
 ## ✨ Features
 - **Declarative Configuration**: Define languages, repositories, and major-mode mappings using a single DSL. It respects the intuitive design of `use-package`, the gold standard for Emacs interfaces.
