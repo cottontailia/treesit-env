@@ -61,8 +61,8 @@ Using the `:vc` keyword in `use-package` is recommended (Emacs 30+):
   :config
   ;; Using Zig as a compiler (highly recommended for Windows)
   (when (eq system-type 'windows-nt)
-      (setq treesit-env-compiler-cc '("zig" "cc"))
-      (setq treesit-env-compiler-c++ '("zig" "c++")))
+      (setq treesit-env-compiler-cc '("zig" "cc" "-O3"))
+      (setq treesit-env-compiler-c++ '("zig" "c++" "-O3")))
 
   ;; Use the provided minimal sample recipes (Optional)
   (require 'treesit-env-recipe-placeholder)
