@@ -287,9 +287,12 @@ Returns nil if the file does not exist or version is not found."
                   (when dep-recipe (treesit-env--execute-install dep-recipe)))))
 
             (treesit-env--message lang-str "Fetching (%s)..." (or revision "latest"))
-            (if (or (null revision) (eq revision 'auto))
-                (call-process "git" nil nil nil "clone" "--quiet" "--depth" "1" url repo-root)
-              (call-process "git" nil nil nil "clone" "--quiet" "--depth" "1" "--branch" revision url repo-root))
+            (let ((clone-result
+                   (if (or (null revision) (eq revision 'auto))
+                       (call-process "git" nil nil nil "clone" "--quiet" "--depth" "1" url repo-root)
+                     (call-process "git" nil nil nil "clone" "--quiet" "--depth" "1" "--branch" revision url repo-root))))
+              (unless (zerop clone-result)
+                (treesit-env--abort lang-str "Failed to clone repository: %s" url)))
 
             (unless (file-exists-p parser-file)
               (if (and rel-src (not (string-empty-p rel-src)))
@@ -325,9 +328,13 @@ Returns nil if the file does not exist or version is not found."
                                                (progn (funcall target) (font-lock-ensure))
                                              (treesit-query-error (setq has-error t))
                                              (error (treesit-env--message lang-str "Mode activation error: %S" err-sub)))
-                                           (if has-error
-                                               (treesit-env--warning lang-str "Installed! PLEASE RESTART EMACS to fix query mismatch.")
-                                             (treesit-env--message lang-str "Installed!")))))))))
+                                           (cond
+                                            (has-error
+                                             (treesit-env--warning lang-str "Installed! PLEASE RESTART EMACS to fix query mismatch."))
+                                            ((not (fboundp target))
+                                             (treesit-env--warning lang-str "Grammar installed, but %s is not available. Install the major mode package." target))
+                                            (t
+                                             (treesit-env--message lang-str "Installed and ready!"))))))))))
         (when (file-exists-p temp-dir) (delete-directory temp-dir t))
         (setq treesit-env--installing-stack (cl-remove lang treesit-env--installing-stack :test #'eq))))))
 
