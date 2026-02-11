@@ -63,7 +63,7 @@
    (java)
    (python)
    (ruby)
-   (toml)
+   (toml :mode "\\.toml\\'")
    (json :mode js-json-mode)
    (rust :mode "\\.rs\\'")
    (bash :mode "\\.sh\\'" "\\.bash\\'" "\\.bash_profile\\'" "\\.bashrc\\'"
@@ -72,7 +72,7 @@
    ;; --- 2. Advanced Mode Mapping & Aliases ---
    (c-sharp :mode csharp-mode :use csharp-ts-mode)
    (javascript :use js-ts-mode :mode js-mode javascript-mode)
-   (yaml :vc grammars)
+   (yaml :vc grammars :mode "\\.ya?ml\\'")
    (lua :vc grammars :mode "\\.lua\\'" :interpreter "\\<lua\\(?:jit\\)?")
    
    ;; --- 3. Recursive Dependency Resolution ---
