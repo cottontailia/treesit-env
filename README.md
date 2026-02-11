@@ -93,11 +93,18 @@ Example: `markdown-ts-mode` is not built-in (you need to install the major-mode 
 
 ```elisp
 ;; Example: Defining and enabling a grammar within a :config block
+;; Note: markdown-ts-mode is less mature than markdown-mode.
+;; This example demonstrates manual recipe definition for grammars not in the placeholder.
 (use-package treesit-env
   :config
   (treesit-env markdown
     :vc grammars
-    :mode "\\.md\\'" gfm-mode))
+    :src-path "tree-sitter-markdown/src"
+    :mode "\\.md\\'" gfm-mode
+    :deps markdown-inline)
+  (treesit-env markdown-inline
+    :vc "tree-sitter-grammars/tree-sitter-markdown"
+    :src-path "tree-sitter-markdown-inline/src")
 ```
 
 #### <div id="keywords">🔑 `treesit-env` Keywords</div>
