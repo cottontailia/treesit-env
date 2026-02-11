@@ -40,6 +40,9 @@ This package recommends using [Zig](https://ziglang.org/) as a compiler, especia
 
 With just this, you can stably compile any grammar on the fly without a bloated environment.
 
+> [!WARNING]
+> **The `-O3` flag is required on Windows**: Grammars compiled with Zig without optimization may crash Emacs silently when loaded. The crash occurs at DLL load time with no error message, making it difficult to diagnose. Always include `-O3` in your compiler settings.
+
 ## 📦 Installation & Setup
 
 ### <div id="installation">1. Installation</div>
@@ -61,6 +64,7 @@ Using the `:vc` keyword in `use-package` is recommended (Emacs 30+):
   :config
   ;; Using Zig as a compiler (highly recommended for Windows)
   (when (eq system-type 'windows-nt)
+      ;; NOTE: -O3 is MANDATORY for Zig on Windows to prevent Emacs crashes
       (setq treesit-env-compiler-cc '("zig" "cc" "-O3"))
       (setq treesit-env-compiler-c++ '("zig" "c++" "-O3")))
 
