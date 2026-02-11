@@ -292,7 +292,7 @@ Returns nil if the file does not exist or version is not found."
                        (call-process "git" nil nil nil "clone" "--quiet" "--depth" "1" url repo-root)
                      (call-process "git" nil nil nil "clone" "--quiet" "--depth" "1" "--branch" revision url repo-root))))
               (unless (zerop clone-result)
-                (treesit-env--abort lang-str "Failed to clone repository: %s" url)))
+                (treesit-env--abort lang-str "Cloning failed: Check your network or if :vc \"%s\" is correct." url)))
 
             (unless (file-exists-p parser-file)
               (if (and rel-src (not (string-empty-p rel-src)))
