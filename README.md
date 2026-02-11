@@ -43,7 +43,7 @@ With just this, you can stably compile any grammar on the fly without a bloated 
 ## 📦 Installation & Setup
 
 ### <div id="installation">1. Installation</div>
-Using the `:vc` keyword in `use-package` is recommended:
+Using the `:vc` keyword in `use-package` is recommended (Emacs 30+):
 
 ```elisp
 (use-package treesit-env
@@ -68,6 +68,8 @@ Using the `:vc` keyword in `use-package` is recommended:
   (require 'treesit-env-recipe-placeholder)
   (treesit-env-source treesit-env-recipe-placeholder))
 ```
+
+**For Emacs 29 or alternative package managers**, clone manually or use your preferred method.
 
 ### 2. Enabling Languages
 Settings become active once registered with the `treesit-env` macro. **The actual grammar installation occurs only when you open a file with the corresponding extension or major mode.**
