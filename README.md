@@ -3,6 +3,8 @@
 [![License: CC0](https://img.shields.io/badge/License-CC0-blue.svg)](http://creativecommons.org/publicdomain/zero/1.0/)
 [![Emacs](https://img.shields.io/badge/Emacs-29.1+-purple.svg)](https://www.gnu.org/software/emacs/)
 
+> **📖 Background Story**: [The Day Tree-sitter Killed Portability](https://cottontailia.github.io/posts/the-day-tree-sitter-killed-portability/)
+
 `treesit-env` is a package for declarative and centralized management of the built-in Tree-sitter (`treesit.el`) environment.
 
 ## ✨ Features
