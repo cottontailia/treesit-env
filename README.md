@@ -5,7 +5,7 @@
 
 **treesit-env** is a declarative configuration manager for Tree-sitter grammars in Emacs that solves "ABI mismatch" errors. Automatically detects compatible grammar revisions, resolves dependency installation order, and simplifies Windows setup with Zig—all through a single DSL configuration. Enable syntax highlighting and tree-sitter major modes without manual compilation headaches.
 
-> **📖 Background Story**: [The Day Tree-sitter Killed Portability](https://cottontailia.github.io/posts/the-day-tree-sitter-killed-portability/)
+> **📖 Background Story**: [The Day Tree-sitter Killed Portability](https://cottontailia.github.io/the-day-tree-sitter-killed-portability/)
 
 ## ✨ Features
 - **Declarative Configuration**: Define languages, repositories, and major-mode mappings using a single DSL. It respects the intuitive design of `use-package`, the gold standard for Emacs interfaces.
