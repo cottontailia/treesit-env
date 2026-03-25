@@ -510,12 +510,18 @@ Full set of keywords:
     `(progn
        ,@(mapcar
           (lambda (lang)
-            (let* ((p   (treesit-env--parse-args-to-plist lang body))
-                   (kws (cl-loop for (k v) on p by #'cddr
-                                 unless (eq k :lang)
-                                 when v
-                                 nconc (list k v))))
-              `(treesit-env--apply-internal ',lang ,@kws :activate t)))
+            (let ((p    (treesit-env--parse-args-to-plist lang body))
+                  (rest nil)
+                  (kws  nil))
+              (setq rest p)
+              (while rest
+                (let ((k (car rest))
+                      (v (cadr rest)))
+                  (when (and (not (eq k :lang)) v)
+                    (push k kws)
+                    (push v kws)))
+                (setq rest (cddr rest)))
+              `(treesit-env--apply-internal ',lang ,@(nreverse kws) :activate t)))
           langs))))
 
 (defun treesit-env--check-and-install-all ()
