@@ -21,11 +21,9 @@
 ;;              Quoted values are automatically unwrapped:
 ;;                'symbol -> symbol
 ;;                '(a b) -> a, b (flattened)
-;;   body     - arbitrary forms until next keyword
-;;   :_head   - required initial values at the start of the list
 ;;
-;; All list-like values (list, body) are accumulated in insertion order
-;; using an internal tail-tracked list builder.  There is no
+;; All list values are accumulated in insertion order using an internal
+;; tail-tracked list builder.  There is no
 ;; "collect in reverse, nreverse at the end" convention.
 ;;
 ;; This library also provides `treesit-env-dsl-quote' for safe symbol
@@ -78,35 +76,24 @@ SCHEMA is an alist of (KEYWORD . TYPE) entries where TYPE can be:
   - `single': Requires exactly one value.
   - `list'  : Requires at least one value (collected into a list).
               Quoted values are automatically unwrapped:
-                \='symbol -> symbol
-                \='(a b)  -> a, b (flattened)
-  - `body'  : Consumes all forms until the next keyword.
+                \\='symbol -> symbol
+                \\='(a b)  -> a, b (flattened)
 
-Special SCHEMA entry:
-  - (:_head . TYPE): If present, ARGS must start with at least one value.
-
-All list-like values are accumulated in insertion order using an internal
-tail-tracked list builder.  No \"collect in reverse, nreverse\" convention
+All list values are accumulated in insertion order using an internal
+tail-tracked list builder.  No \\\"collect in reverse, nreverse\\\" convention
 is used.
 
 Example:
-  (treesit-env-dsl-parse \='(c cpp :revision \"main\")
-                         \='((:_head . list) (:revision . single)))
-  => (:_head (c cpp) :revision \"main\")"
-  (let* ((head-config (assq :_head schema))
-         (result nil)
+  (treesit-env-dsl-parse \\='(:revision \\\"main\\\" :deps c cpp)
+                         \\='((:revision . single) (:deps . list)))
+  => (:revision \\\"main\\\" :deps (c cpp))"
+  (let* ((result nil)
          (result-tails nil)   ; plist: key -> tl for that key's value
-         (current-key (and head-config :_head))
-         (current-type (and head-config (cdr head-config)))
-         ;; Direct pointer to the tl of the current list-like key.
+         (current-key nil)
+         (current-type nil)
+         ;; Direct pointer to the tl of the current list key.
          ;; Avoids a plist-get on result-tails for every appended value.
          (current-tl nil))
-
-    ;; Register :_head in tail tracking if it's a list-like type
-    (when (memq current-type '(list body))
-      (let ((tl (treesit-env-dsl--tl-new)))
-        (setq result-tails (plist-put result-tails :_head tl)
-              current-tl tl)))
 
     ;; Helper: append VALUE to the current key's tl.
     ;; plist-put into result is called only on the first append
@@ -139,12 +126,12 @@ Example:
               (cond
                ((and (eq current-type 'single)
                      (not (plist-member result current-key)))
-                (error "DSL syntax error: keyword %S expects a value"
+                (error "syntax error: keyword %S expects a value"
                        current-key))
-               ((and (memq current-type '(list body))
+               ((and (eq current-type 'list)
                      (not (plist-get result current-key)))
-                (error "DSL syntax error: keyword %S expects at least one value"
-                       (if (eq current-key :_head) "Initial position" current-key)))))
+                (error "syntax error: keyword %S expects at least one value"
+                       current-key))))
 
             (let ((type (cdr entry)))
               (cond
@@ -154,25 +141,25 @@ Example:
                       current-type 'single
                       current-tl nil))
 
-               ;; list / body: initialize tl accumulator
-               ((memq type '(list body))
+               ;; list: initialize tl accumulator
+               ((eq type 'list)
                 (setq current-key item
-                      current-type type)
+                      current-type 'list)
                 (init-list-key item))
 
                (t
-                (error "DSL internal error: unknown schema type %S for keyword %S"
+                (error "internal error: unknown schema type %S for keyword %S"
                        type item)))))
 
            ;; Unknown keyword
            ((keywordp item)
-            (error "DSL syntax error: unknown keyword %S.  Allowed: %S"
-                   item (mapcar #'car schema)))
+            (error "syntax error: unknown keyword %S" item))
 
            ;; Value
            (t
             (if (null current-key)
-                (error "DSL syntax error: unexpected value %S" item)
+                (error "syntax error: unexpected value %S \
+— must be preceded by a keyword" item)
               (cond
                ;; single: exactly one value, then reset state
                ((eq current-type 'single)
@@ -197,23 +184,19 @@ Example:
                     (append-to-key elem)))
                  ;; Atom: add as-is
                  (t
-                  (append-to-key item))))
-
-               ;; body: each form is one element, O(1) via tail tracking
-               ((eq current-type 'body)
-                (append-to-key item)))))))))
+                  (append-to-key item))))))))))
 
       ;; Final validation
       (when current-key
         (cond
          ((and (eq current-type 'single)
                (not (plist-member result current-key)))
-          (error "DSL syntax error: keyword %S requires a value but input ended"
+          (error "syntax error: keyword %S requires a value but input ended"
                  current-key))
-         ((and (memq current-type '(list body))
+         ((and (eq current-type 'list)
                (not (plist-get result current-key)))
-          (error "DSL syntax error: keyword %S requires at least one value"
-                 (if (eq current-key :_head) :initial-position current-key)))))
+          (error "syntax error: keyword %S requires at least one value"
+                 current-key)))))
 
     result))
 
