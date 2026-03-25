@@ -361,16 +361,16 @@ Returns the generated recipe plist."
          (final-deps (or deps
                          (plist-get existing-recipe :deps)
                          (plist-get default-recipe :deps)))
-         (final-mode (let ((saved (plist-get default-recipe :mode))
-                           (existing (plist-get existing-recipe :mode)))
-                       (if (and mode saved)
-                           (cl-remove-duplicates (append mode saved) :test #'equal)
-                         (or mode existing saved))))
-         (final-inte (let ((saved (plist-get default-recipe :interpreter))
-                           (existing (plist-get existing-recipe :interpreter)))
-                       (if (and interpreter saved)
-                           (cl-remove-duplicates (append interpreter saved) :test #'equal)
-                         (or interpreter existing saved))))
+         (final-mode (let ((base (or (plist-get existing-recipe :mode)
+                                     (plist-get default-recipe :mode))))
+                       (if mode
+                           (cl-union mode base :test #'equal)
+                         base)))
+         (final-inte (let ((base (or (plist-get existing-recipe :interpreter)
+                                     (plist-get default-recipe :interpreter))))
+                       (if interpreter
+                           (cl-union interpreter base :test #'equal)
+                         base)))
          (target-ts-mode (or final-use (intern (concat lang-str "-ts-mode"))))
          (fallback-mode (or (car (last (cl-remove-if-not #'symbolp final-mode)))
                             (intern (concat lang-str "-mode"))))
@@ -510,20 +510,12 @@ Full set of keywords:
     `(progn
        ,@(mapcar
           (lambda (lang)
-            (let ((p (treesit-env--parse-args-to-plist lang body)))
-              `(let* ((lang-sym ',lang)
-                      (local-recipe (list ,@p))
-                      (base-recipe  (cdr (assoc lang-sym treesit-env-recipes))))
-                 (treesit-env--apply-internal
-                  lang-sym
-                  :use (or (plist-get local-recipe :use) (plist-get base-recipe :use))
-                  :vc (or (plist-get local-recipe :vc) (plist-get base-recipe :vc))
-                  :revision (or (plist-get local-recipe :revision) (plist-get base-recipe :revision))
-                  :src-path (or (plist-get local-recipe :src-path) (plist-get base-recipe :src-path))
-                  :deps (or (plist-get local-recipe :deps) (plist-get base-recipe :deps))
-                  :mode (or (plist-get local-recipe :mode) (plist-get base-recipe :mode))
-                  :interpreter (or (plist-get local-recipe :interpreter) (plist-get base-recipe :interpreter))
-                  :activate t))))
+            (let* ((p   (treesit-env--parse-args-to-plist lang body))
+                   (kws (cl-loop for (k v) on p by #'cddr
+                                 unless (eq k :lang)
+                                 when v
+                                 nconc (list k v))))
+              `(treesit-env--apply-internal ',lang ,@kws :activate t)))
           langs))))
 
 (defun treesit-env--check-and-install-all ()
