@@ -21,7 +21,6 @@
 ;;              Quoted values are automatically unwrapped:
 ;;                'symbol -> symbol
 ;;                '(a b) -> a, b (flattened)
-;;   flag     - optional boolean flag
 ;;   body     - arbitrary forms until next keyword
 ;;   :_head   - required initial values at the start of the list
 ;;
@@ -79,22 +78,21 @@ SCHEMA is an alist of (KEYWORD . TYPE) entries where TYPE can be:
   - `single': Requires exactly one value.
   - `list'  : Requires at least one value (collected into a list).
               Quoted values are automatically unwrapped:
-                \\='symbol -> symbol
-                \\='(a b)  -> a, b (flattened)
-  - `flag'  : Optional boolean (0 or nil is false, otherwise true).
+                \='symbol -> symbol
+                \='(a b)  -> a, b (flattened)
   - `body'  : Consumes all forms until the next keyword.
 
 Special SCHEMA entry:
   - (:_head . TYPE): If present, ARGS must start with at least one value.
 
 All list-like values are accumulated in insertion order using an internal
-tail-tracked list builder.  No \\\"collect in reverse, nreverse\\\" convention
+tail-tracked list builder.  No \"collect in reverse, nreverse\" convention
 is used.
 
 Example:
-  (treesit-env-dsl-parse \\='(c cpp :revision \\\"main\\\")
-                         \\='((:_head . list) (:revision . single)))
-  => (:_head (c cpp) :revision \\\"main\\\")"
+  (treesit-env-dsl-parse \='(c cpp :revision \"main\")
+                         \='((:_head . list) (:revision . single)))
+  => (:_head (c cpp) :revision \"main\")"
   (let* ((head-config (assq :_head schema))
          (result nil)
          (result-tails nil)   ; plist: key -> tl for that key's value
@@ -150,21 +148,6 @@ Example:
 
             (let ((type (cdr entry)))
               (cond
-               ;; Flag: process immediately, no pending state.
-               ;; Must be checked before functionp, because some type
-               ;; symbols like 'list happen to be bound as Emacs built-in
-               ;; functions and would be misidentified as custom parsers.
-               ((eq type 'flag)
-                (let ((val (if (and args (not (keywordp (car args))))
-                               (pop args)
-                             t)))
-                  (setq result (plist-put result item
-                                          (and val (not (and (numberp val)
-                                                             (<= val 0)))))
-                        current-key nil
-                        current-type nil
-                        current-tl nil)))
-
                ;; single: no accumulator needed
                ((eq type 'single)
                 (setq current-key item
@@ -218,7 +201,7 @@ Example:
 
                ;; body: each form is one element, O(1) via tail tracking
                ((eq current-type 'body)
-                (append-to-key item))))))))
+                (append-to-key item)))))))))
 
       ;; Final validation
       (when current-key
@@ -230,7 +213,7 @@ Example:
          ((and (memq current-type '(list body))
                (not (plist-get result current-key)))
           (error "DSL syntax error: keyword %S requires at least one value"
-                 (if (eq current-key :_head) :initial-position current-key))))))
+                 (if (eq current-key :_head) :initial-position current-key)))))
 
     result))
 
