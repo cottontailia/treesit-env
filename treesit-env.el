@@ -501,28 +501,29 @@ Full set of keywords:
     :interpreter \"sh\" \"py\")  ; Append: additional shebang sigils"
   (declare (indent 0))
   (let (langs body)
-    (while (and args (not (keywordp (car args))))
-      (let ((arg (pop args)))
-        (if (listp arg)
-            (setq langs (append langs arg))
-          (push arg langs))))
-    (setq langs (nreverse langs)
-          body args)
+    (let ((langs-tl (treesit-env--tl-new)))
+      (while (and args (not (keywordp (car args))))
+        (let ((arg (pop args)))
+          (if (listp arg)
+              (treesit-env--tl-extend! langs-tl (copy-sequence arg))
+            (treesit-env--tl-append! langs-tl arg))))
+      (setq langs (treesit-env--tl-value langs-tl)
+            body args))
     `(progn
        ,@(mapcar
           (lambda (lang)
-            (let ((p    (treesit-env--parse-args-to-plist lang body))
-                  (rest nil)
-                  (kws  nil))
-              (setq rest p)
+            (let* ((p      (treesit-env--parse-args-to-plist lang body))
+                   (kws-tl (treesit-env--tl-new))
+                   (rest   p))
               (while rest
                 (let ((k (car rest))
                       (v (cadr rest)))
                   (when (and (not (eq k :lang)) v)
-                    (push k kws)
-                    (push v kws)))
+                    (treesit-env--tl-append! kws-tl k)
+                    (treesit-env--tl-append! kws-tl v)))
                 (setq rest (cddr rest)))
-              `(treesit-env--apply-internal ',lang ,@(nreverse kws) :activate t)))
+              `(treesit-env--apply-internal
+                ',lang ,@(treesit-env--tl-value kws-tl) :activate t)))
           langs))))
 
 (defun treesit-env--check-and-install-all ()
@@ -611,15 +612,33 @@ Full set of keywords:
                (deps (plist-get recipe :deps))
                (mode (plist-get recipe :mode))
                (inte (plist-get recipe :interpreter))
-               (line (list lang)))
-          (when use (setq line (append line (list :use use))))
-          (when vc (setq line (append line (list :vc vc))))
-          (when rev (setq line (append line (list :revision rev))))
-          (when src (setq line (append line (list :src-path src))))
-          (when deps (setq line (append line (cons :deps (if (listp deps) deps (list deps))))))
-          (when mode (setq line (append line (cons :mode (if (listp mode) mode (list mode))))))
-          (when inte (setq line (append line (cons :interpreter (if (listp inte) inte (list inte))))))
-          (insert (format "  %s\n" (prin1-to-string line)))))
+               (line-tl (treesit-env--tl-new)))
+          (treesit-env--tl-append! line-tl lang)
+          (when use
+            (treesit-env--tl-append! line-tl :use)
+            (treesit-env--tl-append! line-tl use))
+          (when vc
+            (treesit-env--tl-append! line-tl :vc)
+            (treesit-env--tl-append! line-tl vc))
+          (when rev
+            (treesit-env--tl-append! line-tl :revision)
+            (treesit-env--tl-append! line-tl rev))
+          (when src
+            (treesit-env--tl-append! line-tl :src-path)
+            (treesit-env--tl-append! line-tl src))
+          (when deps
+            (treesit-env--tl-append! line-tl :deps)
+            (treesit-env--tl-extend! line-tl
+                                     (if (listp deps) (copy-sequence deps) (list deps))))
+          (when mode
+            (treesit-env--tl-append! line-tl :mode)
+            (treesit-env--tl-extend! line-tl
+                                     (if (listp mode) (copy-sequence mode) (list mode))))
+          (when inte
+            (treesit-env--tl-append! line-tl :interpreter)
+            (treesit-env--tl-extend! line-tl
+                                     (if (listp inte) (copy-sequence inte) (list inte))))
+          (insert (format "  %s\n" (prin1-to-string (treesit-env--tl-value line-tl))))))
       (insert ")")
       (indent-region (point-min) (point-max))
       (display-buffer (current-buffer)))
