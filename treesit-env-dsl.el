@@ -32,40 +32,7 @@
 ;;; Code:
 
 (require 'cl-lib)
-
-;;; Internal Tail-Tracked List Builder
-;;
-;; An O(1)-append list builder used to accumulate parsed values in
-;; insertion order without a final nreverse step.
-;; Stores (HEAD . TAIL): HEAD is the first cons cell, TAIL the last.
-
-(cl-defstruct (treesit-env-dsl--tl
-               (:constructor treesit-env-dsl--tl--make (head tail)))
-  "Internal tail-tracked list builder.
-HEAD is the first cons cell; TAIL is the last cons cell."
-  head tail)
-
-(defun treesit-env-dsl--tl-new ()
-  "Return a new empty tail-tracked list builder."
-  (treesit-env-dsl--tl--make nil nil))
-
-(defun treesit-env-dsl--tl-empty-p (tl)
-  "Return non-nil if TL contains no elements."
-  (null (treesit-env-dsl--tl-head tl)))
-
-(defun treesit-env-dsl--tl-append! (tl item)
-  "Append ITEM to TL destructively and return TL.  O(1)."
-  (let ((cell (cons item nil)))
-    (if (treesit-env-dsl--tl-empty-p tl)
-        (setf (treesit-env-dsl--tl-head tl) cell
-              (treesit-env-dsl--tl-tail tl) cell)
-      (setcdr (treesit-env-dsl--tl-tail tl) cell)
-      (setf (treesit-env-dsl--tl-tail tl) cell)))
-  tl)
-
-(defun treesit-env-dsl--tl-value (tl)
-  "Return the list built by TL."
-  (treesit-env-dsl--tl-head tl))
+(require 'treesit-env-tl)
 
 ;;; Parser
 
@@ -101,17 +68,17 @@ Example:
     ;; via tl-append!, so the pointer already in result remains valid.
     (cl-labels
         ((append-to-key (value)
-           (let ((was-empty (treesit-env-dsl--tl-empty-p current-tl)))
-             (treesit-env-dsl--tl-append! current-tl value)
+           (let ((was-empty (treesit-env--tl-empty-p current-tl)))
+             (treesit-env--tl-append! current-tl value)
              (when was-empty
                (setq result (plist-put result current-key
-                                       (treesit-env-dsl--tl-value current-tl))))))
+                                       (treesit-env--tl-value current-tl))))))
 
          (init-list-key (key)
            (let ((existing (plist-get result-tails key)))
              (if existing
                  (setq current-tl existing)
-               (let ((tl (treesit-env-dsl--tl-new)))
+               (let ((tl (treesit-env--tl-new)))
                  (setq result-tails (plist-put result-tails key tl)
                        current-tl tl))))))
 

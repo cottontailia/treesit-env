@@ -26,6 +26,7 @@
 
 (require 'cl-lib)
 (require 'treesit)
+(require 'treesit-env-tl)
 (require 'treesit-env-dsl)
 
 (defconst treesit-env-version "0.5.2"
