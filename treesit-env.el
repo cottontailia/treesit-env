@@ -287,7 +287,13 @@ Returns nil if the file does not exist or version is not found."
                 (let ((dep-recipe (cl-find dep treesit-env--active-recipes :key (lambda (r) (plist-get r :lang)) :test #'eq)))
                   (when (and (not dep-recipe) (assoc dep treesit-env-recipes))
                     (setq dep-recipe (treesit-env--apply-internal dep :activate nil)))
-                  (when dep-recipe (treesit-env--execute-install dep-recipe)))))
+                  (when dep-recipe
+                    (condition-case dep-err
+                        (treesit-env--execute-install dep-recipe)
+                      (error
+                       (treesit-env--abort lang-str "Dependency %s failed: %s"
+                                           (symbol-name dep)
+                                           (error-message-string dep-err))))))))
 
             (treesit-env--message lang-str "Fetching (%s)..." (or revision "latest"))
             (let ((clone-result
