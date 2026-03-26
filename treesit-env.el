@@ -240,28 +240,29 @@ Returns nil if the file does not exist or version is not found."
          (triggers (plist-get recipe :triggers))
          (inte-list (plist-get recipe :interpreter)))
 
-    (unless (fboundp fallback)
-      (defalias fallback
-        (lambda ()
-          (interactive)
-          (fundamental-mode)
-          (setq major-mode fallback)
-          (setq mode-name (format "%s-Install" lang-str)))))
+    (let ((stub (intern (format "treesit-env--stub-%s" lang-str))))
+      (unless (fboundp stub)
+        (defalias stub
+          (lambda ()
+            (interactive)
+            (fundamental-mode)
+            (setq major-mode stub)
+            (setq mode-name (format "%s-Install" lang-str)))))
 
-    (dolist (trigger triggers)
-      (if (stringp trigger)
-          (setq auto-mode-alist
-                (cons (cons trigger (if available target fallback))
-                      (cl-remove trigger auto-mode-alist :key #'car :test #'equal)))
-        (setq major-mode-remap-alist
-              (cl-remove trigger major-mode-remap-alist :key #'car :test #'eq))
-        (when available
-          (push (cons trigger target) major-mode-remap-alist))))
+      (dolist (trigger triggers)
+        (if (stringp trigger)
+            (setq auto-mode-alist
+                  (cons (cons trigger (if available target stub))
+                        (cl-remove trigger auto-mode-alist :key #'car :test #'equal)))
+          (setq major-mode-remap-alist
+                (cl-remove trigger major-mode-remap-alist :key #'car :test #'eq))
+          (when available
+            (push (cons trigger target) major-mode-remap-alist))))
 
-    (dolist (inte inte-list)
-      (setq interpreter-mode-alist
-            (cons (cons inte (if available target fallback))
-                  (cl-delete inte interpreter-mode-alist :key #'car :test #'equal))))))
+      (dolist (inte inte-list)
+        (setq interpreter-mode-alist
+              (cons (cons inte (if available target stub))
+                    (cl-delete inte interpreter-mode-alist :key #'car :test #'equal)))))))
 
 (defun treesit-env--execute-install (recipe)
   "Perform the actual fetch and installation process for RECIPE."
