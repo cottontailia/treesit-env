@@ -566,6 +566,15 @@ Full set of keywords:
      (t
       (message "[treesit-env] Installation cancelled.")))))
 
+(defun treesit-env--lib-file (lang-str)
+  "Return the expected installed library file path for LANG-STR."
+  (let ((ext (or module-file-suffix
+                 (pcase system-type
+                   ('darwin ".dylib") ('windows-nt ".dll") (_ ".so")))))
+    (expand-file-name
+     (concat "libtree-sitter-" lang-str ext)
+     (expand-file-name "tree-sitter" user-emacs-directory))))
+
 ;;;###autoload
 (defun treesit-env-reinstall (lang-sym)
   "Force a reinstallation of the activated grammar for LANG-SYM."
@@ -577,13 +586,7 @@ Full set of keywords:
   (let ((recipe (cl-find lang-sym treesit-env--active-recipes
                          :key (lambda (r) (plist-get r :lang)) :test #'eq)))
     (when (and recipe (y-or-n-p (format "Force reinstall %s grammar? " lang-sym)))
-      (let* ((lang-str (symbol-name lang-sym))
-             (ext (or module-file-suffix
-                      (pcase system-type
-                        ('darwin ".dylib") ('windows-nt ".dll") (_ ".so"))))
-             (lib-file (expand-file-name
-                        (concat "libtree-sitter-" lang-str ext)
-                        (expand-file-name "tree-sitter" user-emacs-directory))))
+      (let ((lib-file (treesit-env--lib-file (symbol-name lang-sym))))
         (when (file-exists-p lib-file) (delete-file lib-file))
         (treesit-env--execute-install recipe)))))
 
