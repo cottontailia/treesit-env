@@ -596,6 +596,44 @@ Full set of keywords:
         (treesit-env--execute-install recipe)))))
 
 ;;;###autoload
+(defun treesit-env-status ()
+  "Display the status of all active grammars in a dedicated buffer."
+  (interactive)
+  (let ((buf (get-buffer-create "*treesit-env-status*"))
+        (recipes (reverse treesit-env--active-recipes)))
+    (with-current-buffer buf
+      (let ((inhibit-read-only t))
+        (erase-buffer)
+        (if (null recipes)
+            (insert "No active grammars.\n")
+          (let* ((col-lang 20)
+                 (col-status 10)
+                 (col-rev 12)
+                 (fmt (format "%%-%ds %%-%ds %%-%ds %%s\n" col-lang col-status col-rev))
+                 (sep (format "%%-%ds %%-%ds %%-%ds %%s\n" col-lang col-status col-rev)))
+            (insert (format fmt "Language" "Status" "Revision" "VC"))
+            (insert (format sep
+                            (make-string (1- col-lang) ?-)
+                            (make-string (1- col-status) ?-)
+                            (make-string (1- col-rev) ?-)
+                            "---"))
+            (dolist (recipe recipes)
+              (let* ((lang (plist-get recipe :lang))
+                     (lang-str (plist-get recipe :lang-str))
+                     (rev (plist-get recipe :revision))
+                     (vc (plist-get recipe :vc))
+                     (available (treesit-language-available-p lang))
+                     (status-str (if available "yes" "no"))
+                     (rev-str (cond ((null rev) "HEAD")
+                                    ((eq rev 'auto) "auto")
+                                    (t (format "%s" rev))))
+                     (vc-str (cond ((null vc) "(default)")
+                                   ((eq vc 'grammars) "grammars")
+                                   (t (format "%s" vc)))))
+                (insert (format fmt lang-str status-str rev-str vc-str))))))))
+    (display-buffer buf)))
+
+;;;###autoload
 (defun treesit-env-reset-skips ()
   "Clear the record of skipped installations for the current session."
   (interactive)
