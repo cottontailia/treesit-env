@@ -137,8 +137,10 @@ Returns nil if the file does not exist or version is not found."
       (let ((default-directory repo-root))
         (treesit-env--message lang-str "Deepening history... (attempt %d/%d)"
                               attempt treesit-env-auto-retry-fetch-limit)
-        (call-process "git" nil nil nil "fetch" "--quiet" "--deepen"
-                      (number-to-string treesit-env-auto-retry-fetch-step)))
+        (unless (zerop (call-process "git" nil nil nil "fetch" "--quiet" "--deepen"
+                                     (number-to-string treesit-env-auto-retry-fetch-step)))
+          (treesit-env--message lang-str "git fetch failed; aborting revision search")
+          (setq attempt treesit-env-auto-retry-fetch-limit)))
       (with-temp-buffer
         (let ((default-directory repo-root))
           (call-process "git" nil t nil "log" "--format=%H" "--" git-path))
