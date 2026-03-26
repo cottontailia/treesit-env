@@ -7,7 +7,7 @@
 ;; URL: https://github.com/cottontailia/treesit-env
 ;; Version: 0.5.2
 ;; Package-Requires: ((emacs "29.1") (cl-lib "1.0"))
-;; Keywords: tree-sitter, tools, maint
+;; Keywords: languages, tools
 ;; License: CC0
 
 ;;; Commentary:
