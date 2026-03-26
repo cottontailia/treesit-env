@@ -314,10 +314,15 @@ Returns nil if the file does not exist or version is not found."
             (let ((abi-max (or treesit-env-abi-max (treesit-library-abi-version)))
                   (abi-got (treesit-env--get-file-abi parser-file)))
               (when (and abi-got (> abi-got abi-max))
-                (treesit-env--abort
-                 lang-str
-                 "ABI %d too new (max %d). Try setting :revision \"...\" etc."
-                 abi-got abi-max)))
+                (if (and revision (not (eq revision 'auto)))
+                    (treesit-env--warning
+                     lang-str
+                     "ABI %d exceeds max %d, but :revision %S is explicitly set. Proceeding anyway."
+                     abi-got abi-max revision)
+                  (treesit-env--abort
+                   lang-str
+                   "ABI %d too new (max %d). Try setting :revision \"...\" etc."
+                   abi-got abi-max))))
 
             (treesit-env--message lang-str "Installing grammar...")
             (let ((treesit-language-source-alist
