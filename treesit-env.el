@@ -571,6 +571,36 @@ Full set of keywords:
      (t
       (message "[treesit-env] Installation cancelled.")))))
 
+;;;###autoload
+(defun treesit-env-update-all ()
+  "Reinstall all active grammars whose revision is not explicitly pinned.
+Grammars with :revision nil (HEAD) or :revision auto are reinstalled.
+Grammars with an explicit :revision string are skipped."
+  (interactive)
+  (let* ((updatable (cl-remove-if
+                     (lambda (r)
+                       (let ((rev (plist-get r :revision)))
+                         (and rev (not (eq rev 'auto)))))
+                     treesit-env--active-recipes))
+         (skipped (- (length treesit-env--active-recipes) (length updatable))))
+    (cond
+     ((null treesit-env--active-recipes)
+      (message "[treesit-env] No active grammars."))
+     ((null updatable)
+      (message "[treesit-env] All grammars are pinned; nothing to update."))
+     ((y-or-n-p (format "Update %d grammar(s)%s? This may take some time... "
+                        (length updatable)
+                        (if (> skipped 0)
+                            (format " (%d pinned, skipped)" skipped)
+                          "")))
+      (dolist (recipe updatable)
+        (let ((lib-file (treesit-env--lib-file (plist-get recipe :lang-str))))
+          (when (file-exists-p lib-file) (delete-file lib-file))
+          (treesit-env--execute-install recipe)))
+      (message "[treesit-env] Update complete."))
+     (t
+      (message "[treesit-env] Update cancelled.")))))
+
 (defun treesit-env--lib-file (lang-str)
   "Return the expected installed library file path for LANG-STR."
   (let ((ext (or module-file-suffix
