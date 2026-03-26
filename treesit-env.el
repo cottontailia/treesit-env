@@ -235,7 +235,6 @@ Returns nil if the file does not exist or version is not found."
   (let* ((lang (plist-get recipe :lang))
          (lang-str (plist-get recipe :lang-str))
          (target (plist-get recipe :target))
-         (fallback (plist-get recipe :fallback))
          (available (treesit-language-available-p lang))
          (triggers (plist-get recipe :triggers))
          (inte-list (plist-get recipe :interpreter)))
