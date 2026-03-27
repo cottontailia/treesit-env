@@ -81,6 +81,12 @@ and manual installations to respect this limit."
                  (integer :tag "Max ABI Version"))
   :group 'treesit-env)
 
+(defcustom treesit-env-no-confirm nil
+  "If non-nil, install grammars without asking for confirmation.
+When nil (the default), a y-or-n-p prompt is shown before each installation."
+  :type 'boolean
+  :group 'treesit-env)
+
 (defvar treesit-env-recipes nil
   "Internal database of registered language recipes.")
 
@@ -547,7 +553,8 @@ Full set of keywords:
       (when (and (not (treesit-language-available-p lang))
                  (not (memq lang treesit-env--skipped-languages))
                  (treesit-env--buffer-context-p recipe))
-        (if (y-or-n-p (format "%s grammar is missing. Install? " lang-str))
+        (if (or treesit-env-no-confirm
+                (y-or-n-p (format "%s grammar is missing. Install? " lang-str)))
             (treesit-env--execute-install recipe)
           (push lang treesit-env--skipped-languages))))))
 
@@ -561,7 +568,8 @@ Full set of keywords:
     (cond
      ((null langs)
       (message "[treesit-env] No missing grammars to install."))
-     ((y-or-n-p (format "Install %d missing grammars? This may take some time... " (length langs)))
+     ((or treesit-env-no-confirm
+          (y-or-n-p (format "Install %d missing grammars? This may take some time... " (length langs))))
       (dolist (lang langs)
         (let ((recipe (cl-find lang treesit-env--active-recipes
                                :key (lambda (r) (plist-get r :lang)) :test #'eq)))
@@ -588,11 +596,12 @@ Grammars with an explicit :revision string are skipped."
       (message "[treesit-env] No active grammars."))
      ((null updatable)
       (message "[treesit-env] All grammars are pinned; nothing to update."))
-     ((y-or-n-p (format "Update %d grammar(s)%s? This may take some time... "
-                        (length updatable)
-                        (if (> skipped 0)
-                            (format " (%d pinned, skipped)" skipped)
-                          "")))
+     ((or treesit-env-no-confirm
+          (y-or-n-p (format "Update %d grammar(s)%s? This may take some time... "
+                            (length updatable)
+                            (if (> skipped 0)
+                                (format " (%d pinned, skipped)" skipped)
+                              ""))))
       (dolist (recipe updatable)
         (let ((lib-file (treesit-env--lib-file (plist-get recipe :lang-str))))
           (when (file-exists-p lib-file) (delete-file lib-file))
@@ -620,7 +629,9 @@ Grammars with an explicit :revision string are skipped."
                           treesit-env--active-recipes)))))
   (let ((recipe (cl-find lang-sym treesit-env--active-recipes
                          :key (lambda (r) (plist-get r :lang)) :test #'eq)))
-    (when (and recipe (y-or-n-p (format "Force reinstall %s grammar? " lang-sym)))
+    (when (and recipe
+               (or treesit-env-no-confirm
+                   (y-or-n-p (format "Force reinstall %s grammar? " lang-sym))))
       (let ((lib-file (treesit-env--lib-file (symbol-name lang-sym))))
         (when (file-exists-p lib-file) (delete-file lib-file))
         (treesit-env--execute-install recipe)))))
