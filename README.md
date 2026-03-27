@@ -121,7 +121,7 @@ Example: `markdown-ts-mode` is not built-in (you need to install the major-mode 
 | :--- | :--- |
 | `:use` | Name of the `ts-mode` to use. Defaults to `(lang)-ts-mode`. |
 | `:vc` | Source repository for the grammar. See the patterns below. |
-| `:revision` | Git revision (tag, branch, or commit hash). Use `auto` for discovery. **Defaults to the value of `treesit-env-default-revision-auto` if omitted.** |
+| `:revision` | Git revision (tag, branch, or commit hash). Use `auto` for discovery. **Defaults to the value of `treesit-env-default-revision-auto` if omitted.** When explicitly set to a string, ABI mismatch becomes a warning (not an error). |
 | `:src-path` | Subdirectory containing the source (for monorepos). |
 | `:deps` | List of languages that must be installed/compiled first. |
 | `:mode` | Regex for file extensions or the original major-mode to remap. **Can be multiple.** |
@@ -209,7 +209,9 @@ Instead, I've provided a **Dump feature** (`M-x treesit-env-dump-recipes`). It g
 | Name | Description |
 | :--- | :--- |
 | `treesit-env-install-all` | Installs all missing grammars for active languages at once. |
+| `treesit-env-update-all` | Reinstalls grammars whose `:revision` is `nil` (HEAD) or `auto`. Explicitly pinned revisions are skipped. |
 | `treesit-env-reinstall` | Force-deletes and re-installs/re-compiles a specific grammar. |
+| `treesit-env-status` | Displays a table of all active grammars showing installation status, configured `:revision`, and `:vc` source in a dedicated buffer. |
 | `treesit-env-dump-recipes` | Dumps current active configurations in recipe format. |
 | `treesit-env-reset-skips` | Clears all "don't ask again" flags for skipped installations. |
 
