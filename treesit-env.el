@@ -726,6 +726,7 @@ Grammars with an explicit :revision string are skipped."
           (insert (format "  %s\n" (prin1-to-string (treesit-env--tl-value line-tl))))))
       (insert ")")
       (indent-region (point-min) (point-max))
+      (read-only-mode 1)
       (display-buffer (current-buffer)))
     (message "[treesit-env] Configuration dumped to %s" dump-buffer)))
 
