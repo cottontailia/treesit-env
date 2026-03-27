@@ -632,6 +632,7 @@ Grammars with an explicit :revision string are skipped."
   (let ((buf (get-buffer-create "*treesit-env-status*"))
         (recipes (reverse treesit-env--active-recipes)))
     (with-current-buffer buf
+      (special-mode)
       (let ((inhibit-read-only t))
         (erase-buffer)
         (if (null recipes)
@@ -657,7 +658,7 @@ Grammars with an explicit :revision string are skipped."
                      (rev-str (cond ((null rev) "HEAD")
                                     ((eq rev 'auto) "auto")
                                     (t (format "%s" rev))))
-                     (vc-str (cond ((null vc) "(default)")
+                     (vc-str (cond ((null vc) "official")
                                    ((eq vc 'grammars) "grammars")
                                    (t (format "%s" vc)))))
                 (insert (format fmt lang-str status-str rev-str vc-str))))))))
