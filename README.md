@@ -63,6 +63,9 @@ Using the `:vc` keyword in `use-package` is recommended (Emacs 30+):
   ;; Adjust or remove this once ABI 15+ stabilizes and Emacs supports it
   (treesit-env-abi-max 14)
 
+  ;; If non-nil, skip all installation confirmation prompts (useful for automation)
+  ;; (treesit-env-no-confirm t)
+
   :config
   ;; Using Zig as a compiler (highly recommended for Windows)
   (when (eq system-type 'windows-nt)
@@ -208,7 +211,7 @@ Instead, I've provided a **Dump feature** (`M-x treesit-env-dump-recipes`). It g
 ### Command (M-x)
 | Name | Description |
 | :--- | :--- |
-| `treesit-env-install-all` | Installs all missing grammars for active languages at once. |
+| `treesit-env-install-all` | Installs all missing grammars for active languages at once. Pass `t` as an argument to skip confirmation. |
 | `treesit-env-update-all` | Reinstalls grammars whose `:revision` is `nil` (HEAD) or `auto`. Explicitly pinned revisions are skipped. |
 | `treesit-env-reinstall` | Force-deletes and re-installs/re-compiles a specific grammar. |
 | `treesit-env-status` | Displays a table of all active grammars showing installation status, configured `:revision`, and `:vc` source in a dedicated buffer. |
