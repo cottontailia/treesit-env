@@ -559,16 +559,18 @@ Full set of keywords:
           (push lang treesit-env--skipped-languages))))))
 
 ;;;###autoload
-(defun treesit-env-install-all ()
-  "Install all activated grammars that are not yet available on the system."
-  (interactive)
+(defun treesit-env-install-all (&optional no-confirm)
+  "Install all activated grammars that are not yet available on the system.
+When NO-CONFIRM is non-nil, skip the confirmation prompt.
+Interactively, a prefix argument (\\[universal-argument]) sets NO-CONFIRM."
+  (interactive "P")
   (let ((langs (cl-remove-if #'treesit-language-available-p
                              (mapcar (lambda (r) (plist-get r :lang))
                                      treesit-env--active-recipes))))
     (cond
      ((null langs)
       (message "[treesit-env] No missing grammars to install."))
-     ((or treesit-env-no-confirm
+     ((or no-confirm treesit-env-no-confirm
           (y-or-n-p (format "Install %d missing grammars? This may take some time... " (length langs))))
       (dolist (lang langs)
         (let ((recipe (cl-find lang treesit-env--active-recipes
