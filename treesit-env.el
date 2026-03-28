@@ -652,13 +652,17 @@ Grammars with an explicit :revision string are skipped."
             (insert "No active grammars.\n")
           (let* ((col-lang 20)
                  (col-status 10)
+                 (col-inst 10)
                  (col-rev 12)
-                 (fmt (format "%%-%ds %%-%ds %%-%ds %%s\n" col-lang col-status col-rev))
-                 (sep (format "%%-%ds %%-%ds %%-%ds %%s\n" col-lang col-status col-rev)))
-            (insert (format fmt "Language" "Status" "Revision" "VC"))
+                 (fmt (format "%%-%ds %%-%ds %%-%ds %%-%ds %%s\n"
+                              col-lang col-status col-inst col-rev))
+                 (sep (format "%%-%ds %%-%ds %%-%ds %%-%ds %%s\n"
+                              col-lang col-status col-inst col-rev)))
+            (insert (format fmt "Language" "Status" "Installed" ":revision" ":vc"))
             (insert (format sep
                             (make-string (1- col-lang) ?-)
                             (make-string (1- col-status) ?-)
+                            (make-string (1- col-inst) ?-)
                             (make-string (1- col-rev) ?-)
                             "---"))
             (dolist (recipe recipes)
@@ -668,13 +672,22 @@ Grammars with an explicit :revision string are skipped."
                      (vc (plist-get recipe :vc))
                      (available (treesit-language-available-p lang))
                      (status-str (if available "yes" "no"))
-                     (rev-str (cond ((null rev) "HEAD")
-                                    ((eq rev 'auto) "auto")
-                                    (t (format "%s" rev))))
+                     (inst-str (let ((attrs (file-attributes
+                                             (treesit-env--lib-file lang-str))))
+                                 (if attrs
+                                     (format-time-string
+                                      "%Y-%m-%d"
+                                      (file-attribute-modification-time attrs))
+                                   "-")))
+                     (effective-rev (or rev
+                                        (and treesit-env-default-revision-auto 'auto)))
+                     (rev-str (cond ((null effective-rev) "HEAD")
+                                    ((eq effective-rev 'auto) "auto")
+                                    (t (format "%s" effective-rev))))
                      (vc-str (cond ((null vc) "official")
                                    ((eq vc 'grammars) "grammars")
                                    (t (format "%s" vc)))))
-                (insert (format fmt lang-str status-str rev-str vc-str))))))))
+                (insert (format fmt lang-str status-str inst-str rev-str vc-str))))))))
     (display-buffer buf)))
 
 ;;;###autoload
