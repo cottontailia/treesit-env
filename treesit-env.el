@@ -654,16 +654,18 @@ Grammars with an explicit :revision string are skipped."
                  (col-status 10)
                  (col-inst 10)
                  (col-rev 12)
-                 (fmt (format "%%-%ds %%-%ds %%-%ds %%-%ds %%s\n"
-                              col-lang col-status col-inst col-rev))
-                 (sep (format "%%-%ds %%-%ds %%-%ds %%-%ds %%s\n"
-                              col-lang col-status col-inst col-rev)))
-            (insert (format fmt "Language" "Status" "Installed" ":revision" ":vc"))
+                 (col-vc 20)
+                 (fmt (format "%%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%s\n"
+                              col-lang col-status col-inst col-rev col-vc))
+                 (sep (format "%%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%s\n"
+                              col-lang col-status col-inst col-rev col-vc)))
+            (insert (format fmt "Language" "Status" "Installed" ":revision" ":vc" "URL"))
             (insert (format sep
                             (make-string (1- col-lang) ?-)
                             (make-string (1- col-status) ?-)
                             (make-string (1- col-inst) ?-)
                             (make-string (1- col-rev) ?-)
+                            (make-string (1- col-vc) ?-)
                             "---"))
             (dolist (recipe recipes)
               (let* ((lang (plist-get recipe :lang))
@@ -686,8 +688,10 @@ Grammars with an explicit :revision string are skipped."
                                     (t (format "%s" effective-rev))))
                      (vc-str (cond ((null vc) "official")
                                    ((eq vc 'grammars) "grammars")
-                                   (t (format "%s" vc)))))
-                (insert (format fmt lang-str status-str inst-str rev-str vc-str))))))))
+                                   (t (format "%s" vc))))
+                     (url-str (or (nth 1 (assoc lang treesit-language-source-alist))
+                                  "")))
+                (insert (format fmt lang-str status-str inst-str rev-str vc-str url-str))))))))
     (display-buffer buf)))
 
 ;;;###autoload
