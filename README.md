@@ -134,8 +134,8 @@ Example: `markdown-ts-mode` is not built-in (you need to install the major-mode 
 
 | Value | Behavior / Expanded URL |
 | :--- | :--- |
-| (Omitted) | Uses the official `tree-sitter/tree-sitter-(lang)`. |
-| `grammars` | Uses the `tree-sitter-grammars` organization repository. |
+| (Omitted) | Uses the [official tree-sitter repository](https://github.com/tree-sitter) (`tree-sitter/tree-sitter-(lang)`). |
+| `grammars` | Uses the [tree-sitter-grammars](https://github.com/tree-sitter-grammars) organization repository. |
 | `"user/repo"` | Uses the specific GitHub `user/repo`. |
 | `"https://..."` | Uses the full URL (GitLab, Codeberg, mirrors, etc.). |
 
