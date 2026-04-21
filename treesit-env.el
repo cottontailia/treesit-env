@@ -518,7 +518,7 @@ Full set of keywords:
     :deps c cpp              ; Override: dependencies (no parens needed)
     :mode \"\\\\.ext\\\\='\" mode     ; Append: additional patterns/modes
     :interpreter \"sh\" \"py\")  ; Append: additional shebang sigils"
-  (declare (indent 0))
+  (declare (indent defun))
   (let (langs body)
     (let ((langs-tl (treesit-env--tl-new)))
       (while (and args (not (keywordp (car args))))
