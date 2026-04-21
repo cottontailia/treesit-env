@@ -302,10 +302,24 @@ Returns nil if the file does not exist or version is not found."
                                            (error-message-string dep-err))))))))
 
             (treesit-env--message lang-str "Fetching (%s)..." (or revision "latest"))
-            (let ((clone-result
-                   (if (or (null revision) (eq revision 'auto))
-                       (call-process "git" nil nil nil "clone" "--quiet" "--depth" "1" url repo-root)
-                     (call-process "git" nil nil nil "clone" "--quiet" "--depth" "1" "--branch" revision url repo-root))))
+            (let* ((is-commit-hash (and revision
+                                        (not (eq revision 'auto))
+                                        (string-match-p "\\`[0-9a-f]\\{40\\}\\'" revision)))
+                   (clone-result
+                    (cond
+                     (is-commit-hash
+                      (make-directory repo-root t)
+                      (let ((default-directory repo-root))
+                        (if (and (zerop (call-process "git" nil nil nil "init" "--quiet"))
+                                 (zerop (call-process "git" nil nil nil "remote" "add" "origin" url))
+                                 (zerop (call-process "git" nil nil nil "fetch" "--quiet" "--depth" "1" "origin" revision))
+                                 (zerop (call-process "git" nil nil nil "checkout" "--quiet" "FETCH_HEAD")))
+                            0
+                          1)))
+                     ((or (null revision) (eq revision 'auto))
+                      (call-process "git" nil nil nil "clone" "--quiet" "--depth" "1" url repo-root))
+                     (t
+                      (call-process "git" nil nil nil "clone" "--quiet" "--depth" "1" "--branch" revision url repo-root)))))
               (unless (zerop clone-result)
                 (treesit-env--abort lang-str "Cloning failed: Check your network or if :vc \"%s\" is correct." url)))
 
