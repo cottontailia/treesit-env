@@ -620,7 +620,7 @@ Grammars with an explicit :revision string are skipped."
                               ""))))
       (dolist (recipe updatable)
         (let ((lib-file (treesit-env--lib-file (plist-get recipe :lang-str))))
-          (when (file-exists-p lib-file) (delete-file lib-file))
+          (treesit-env--remove-lib-file lib-file)
           (treesit-env--execute-install recipe)))
       (message "[treesit-env] Update complete."))
      (t
@@ -634,6 +634,27 @@ Grammars with an explicit :revision string are skipped."
     (expand-file-name
      (concat "libtree-sitter-" lang-str ext)
      (expand-file-name "tree-sitter" user-emacs-directory))))
+
+(defun treesit-env--cleanup-stale-lib-files ()
+  "Delete leftover *.old grammar files from previous Emacs sessions.
+On Windows, treesit-install-language-grammar renames the old DLL to .old
+before installing the new one but cannot delete it while it is loaded.
+These files are safe to remove at startup before any grammars are loaded."
+  (let ((ts-dir (expand-file-name "tree-sitter" user-emacs-directory)))
+    (when (file-directory-p ts-dir)
+      (dolist (f (directory-files ts-dir t "\\.old\\'"))
+        (ignore-errors (delete-file f))))))
+
+(treesit-env--cleanup-stale-lib-files)
+
+(defun treesit-env--remove-lib-file (lib-file)
+  "Remove LIB-FILE before reinstallation.
+On Windows, this is a no-op: treesit-install-language-grammar handles DLL
+replacement internally by renaming the old file out of the way.
+On other systems, deletes directly."
+  (unless (eq system-type 'windows-nt)
+    (when (file-exists-p lib-file)
+      (delete-file lib-file))))
 
 ;;;###autoload
 (defun treesit-env-reinstall (lang-sym)
@@ -649,7 +670,7 @@ Grammars with an explicit :revision string are skipped."
                (or treesit-env-no-confirm
                    (y-or-n-p (format "Force reinstall %s grammar? " lang-sym))))
       (let ((lib-file (treesit-env--lib-file (symbol-name lang-sym))))
-        (when (file-exists-p lib-file) (delete-file lib-file))
+        (treesit-env--remove-lib-file lib-file)
         (treesit-env--execute-install recipe)))))
 
 ;;;###autoload
