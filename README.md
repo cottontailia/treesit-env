@@ -69,6 +69,9 @@ Using the `:vc` keyword in `use-package` is recommended (Emacs 30+):
   :config
   ;; Using Zig as a compiler (highly recommended for Windows)
   (when (eq system-type 'windows-nt)
+      ;; If Zig was installed via WinGet, add it to exec-path:
+      (add-to-list 'exec-path
+                   (expand-file-name "~/AppData/Local/Microsoft/WinGet/Links"))
       ;; NOTE: -O3 is MANDATORY for Zig on Windows to prevent Emacs crashes
       (setq treesit-env-compiler-cc '("zig" "cc" "-O3"))
       (setq treesit-env-compiler-c++ '("zig" "c++" "-O3")))
