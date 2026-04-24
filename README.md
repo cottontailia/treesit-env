@@ -37,7 +37,11 @@ Typically, using Tree-sitter on Windows requires installing MSYS2 or MinGW. Thes
 
 This package recommends using [Zig](https://ziglang.org/) as a compiler, especially on Windows. Zig is a tiny, single binary that includes an excellent C/C++ compiler.
 
-1. Download Zig from the [official page](https://ziglang.org/download/) and add it to your PATH.
+1. Install Zig via WinGet:
+   ```
+   winget install -e --id zig.zig
+   ```
+   Alternatively, download from the [official page](https://ziglang.org/download/) and add it to your PATH manually.
 2. Set `treesit-env-compiler-cc` and `treesit-env-compiler-c++` to use Zig (see the example in the [Installation](#installation) section).
 
 With just this, you can stably compile any grammar on the fly without a bloated environment.
